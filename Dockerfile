@@ -1,5 +1,5 @@
-FROM docker.sebastian-daschner.com/open-liberty:2
+FROM open-liberty:microProfile2-java8-ibm
 
-ENV JVM_ARGS="-Xmx512M --add-opens java.base/java.net=ALL-UNNAMED"
-
-COPY target/instrument-craft-shop.war $DEPLOYMENT_DIR
+COPY openliberty/server.xml /opt/ol/wlp/usr/servers/defaultServer/server.xml
+COPY target/liberty/wlp/usr/extension /opt/ol/wlp/usr/extension/
+COPY target/instrument-craft-shop.war /opt/ol/wlp/usr/servers/defaultServer/dropins/

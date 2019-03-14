@@ -12,8 +12,8 @@ public class InstrumentCraftShop {
     @Inject
     MakerBot makerBot;
 
-    public void craftInstrument(Instrument instrument) {
-        makerBot.printInstrument(instrument.getType());
+    public void craftInstrument(Instrument instrument, String reqId, String parentspan, int instrument_count) {
+        makerBot.printInstrument(instrument.getType(), reqId, parentspan, instrument_count);
 
         System.out.println("printing instrument " + instrument.getType() + " with price $" + instrument.getPrice());
     }

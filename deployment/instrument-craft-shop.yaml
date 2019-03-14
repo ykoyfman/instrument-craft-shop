@@ -1,25 +1,3 @@
-kind: Deployment
-apiVersion: apps/v1beta1
-metadata:
-  name: instrument-craft-shop
-spec:
-  replicas: 1
-  template:
-    metadata:
-      labels:
-        app: instrument-craft-shop
-        version: v1
-#      annotations:
-#        sidecar.istio.io/inject: "false"
-    spec:
-      containers:
-      - name: instrument-craft-shop
-        image: docker.sebastian-daschner.com/instrument-craft-shop:1
-        imagePullPolicy: Always
-      imagePullSecrets:
-      - name: regsecret
-      restartPolicy: Always
----
 kind: Service
 apiVersion: v1
 metadata:
@@ -32,6 +10,41 @@ spec:
   ports:
     - port: 9080
       name: http
+  type: NodePort
+---
+kind: Deployment
+apiVersion: apps/v1beta1
+metadata:
+  name: instrument-craft-shop
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: instrument-craft-shop
+        version: v1
+    spec:
+      containers:
+      - name: instrument-craft-shop
+        image: registry.ng.bluemix.net/journeys/craft-shop:1
+        imagePullPolicy: Always
+        livenessProbe:
+          exec:
+            command:
+            - /bin/bash
+            - -c
+            - curl -f localhost:9080/
+          initialDelaySeconds: 40
+        readinessProbe:
+          exec:
+            command:
+            - /bin/bash
+            - -c
+            - curl -f localhost:9080/instrument-craft-shop/resources/health
+          initialDelaySeconds: 60
+      imagePullSecrets:
+      - name: ibm-journey 
+      restartPolicy: Always
 ---
 kind: Ingress
 apiVersion: extensions/v1beta1
@@ -43,8 +56,13 @@ spec:
   rules:
   - http:
       paths:
-      - path: /instrument-craft-shop/.*
+      - path: /instrument-craft-shop/resources/instruments
         backend:
           serviceName: instrument-craft-shop
           servicePort: 9080
+      - path: /instrument-craft-shop/resources/health
+        backend:
+          serviceName: instrument-craft-shop
+          servicePort: 9080
+        
 ---
